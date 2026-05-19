@@ -183,9 +183,9 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;b
   </div>
   <div class="form-section">
     <div class="form-section-title">Команда</div>
-    <div class="form-row"><div class="form-row-label">Ставка оператора<small>₽/час</small></div><input type="number" id="inp-op-rate" value="15000" step="500" min="0" onchange="calcState.op_rate=+this.value"></div>
-    <div class="form-row"><div class="form-row-label">Ассистент</div><label class="toggle"><input type="checkbox" id="tog-asst" onchange="calcState.asst=this.checked;document.getElementById('asst-rate-row').style.display=this.checked?'flex':'none'"><span class="toggle-slider"></span></label></div>
-    <div class="form-row" id="asst-rate-row" style="display:none"><div class="form-row-label">Ставка ассистента<small>₽/час</small></div><input type="number" id="inp-asst-rate" value="2500" step="500" min="0" onchange="calcState.asst_rate=+this.value"></div>
+    <div class="form-row"><div class="form-row-label">Ставка оператора<small>₽/час</small></div><input type="number" id="inp-op-rate" value="15000" step="500" min="0" onchange="calcState.op_rate=+this.value;liveUpdate()"></div>
+    <div class="form-row"><div class="form-row-label">Ассистент</div><label class="toggle"><input type="checkbox" id="tog-asst" onchange="calcState.asst=this.checked;document.getElementById('asst-rate-row').style.display=this.checked?'flex':'none';liveUpdate()"><span class="toggle-slider"></span></label></div>
+    <div class="form-row" id="asst-rate-row" style="display:none"><div class="form-row-label">Ставка ассистента<small>₽/час</small></div><input type="number" id="inp-asst-rate" value="2500" step="500" min="0" onchange="calcState.asst_rate=+this.value;liveUpdate()"></div>
   </div>
   <div class="form-section"><div class="form-section-title">Доп. команда</div><div id="extra-crew-rows"></div></div>
   <div class="form-section"><div class="form-section-title">Оборудование</div><div id="equip-rows-calc"></div></div>
@@ -204,22 +204,38 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;b
   </div>
   <div class="form-section">
     <div class="form-section-title">Условия</div>
+    <div class="form-row"><div class="form-row-label">Предпросмотр сметы<small>обновляется в реальном времени</small></div><label class="toggle"><input type="checkbox" id="tog-preview" checked onchange="calcState.livePreview=this.checked;toggleLivePreview()"><span class="toggle-slider"></span></label></div>
     <div class="form-row"><div class="form-row-label">Дедлайн монтажа<small>рабочих дней</small></div><div class="stepper"><button class="step-btn" onclick="adjCalc('deadline',-1)">−</button><span class="step-val" id="val-deadline">10</span><button class="step-btn" onclick="adjCalc('deadline',1)">+</button></div></div>
     <div class="form-row"><div class="form-row-label">Итерации правок</div><div class="stepper"><button class="step-btn" onclick="adjCalc('revisions',-1)">−</button><span class="step-val" id="val-revisions">3</span><button class="step-btn" onclick="adjCalc('revisions',1)">+</button></div></div>
-    <div class="form-row"><div class="form-row-label">Логистика за МКАД<small>₽ в одну сторону (×2)</small></div><input type="number" id="inp-logistics" value="0" min="0" step="500" onchange="calcState.logistics=+this.value"></div>
-    <div class="form-row"><div class="form-row-label">Скидка / Наценка<small>%</small></div><input type="number" id="inp-adj" value="0" min="-100" max="100" onchange="calcState.adj_pct=+this.value"></div>
-    <div class="form-row"><div class="form-row-label">Оплата на ИП (+7%)</div><label class="toggle"><input type="checkbox" id="tog-ip" onchange="calcState.ip=this.checked"><span class="toggle-slider"></span></label></div>
+    <div class="form-row"><div class="form-row-label">Логистика за МКАД<small>₽ в одну сторону (×2)</small></div><input type="number" id="inp-logistics" value="0" min="0" step="500" onchange="calcState.logistics=+this.value;liveUpdate()"></div>
+    <div class="form-row"><div class="form-row-label">Скидка / Наценка<small>%</small></div><input type="number" id="inp-adj" value="0" min="-100" max="100" onchange="calcState.adj_pct=+this.value;liveUpdate()"></div>
+    <div class="form-row">
+      <div class="form-row-label">💳 Оплата на ИП<small id="ip-pct-label">+7%</small></div>
+      <input type="number" id="inp-ip-pct" value="7" min="1" max="50" style="width:60px" onchange="calcState.ipPct=+this.value;document.getElementById('ip-pct-label').textContent='+'+this.value+'%';liveUpdate()">
+      <span style="font-size:13px;color:var(--text2)">%</span>
+      <label class="toggle"><input type="checkbox" id="tog-ip" onchange="calcState.ip=this.checked;liveUpdate()"><span class="toggle-slider"></span></label>
+    </div>
     <div class="form-row">
       <div class="form-row-label">🛡 Финансовый резерв<small id="reserve-hint">—</small></div>
-      <input type="number" id="inp-reserve-pct" value="10" min="0" max="100" style="width:70px" onchange="calcState.reservePct=+this.value;updateReserveHint()">
+      <input type="number" id="inp-reserve-pct" value="10" min="0" max="100" style="width:70px" onchange="calcState.reservePct=+this.value;updateReserveHint();liveUpdate()">
       <span style="font-size:13px;color:var(--text2)">%</span>
-      <label class="toggle"><input type="checkbox" id="tog-reserve" onchange="calcState.reserve=this.checked;updateReserveHint()"><span class="toggle-slider"></span></label>
+      <label class="toggle"><input type="checkbox" id="tog-reserve" onchange="calcState.reserve=this.checked;updateReserveHint();liveUpdate()"><span class="toggle-slider"></span></label>
     </div>
     <div class="form-row">
       <div class="form-row-label">🏢 Агентская наценка<small id="agency-hint">—</small></div>
-      <input type="number" id="inp-agency-pct" value="15" min="0" max="100" style="width:70px" onchange="calcState.agencyPct=+this.value;updateAgencyHint()">
+      <input type="number" id="inp-agency-pct" value="15" min="0" max="100" style="width:70px" onchange="calcState.agencyPct=+this.value;updateAgencyHint();liveUpdate()">
       <span style="font-size:13px;color:var(--text2)">%</span>
-      <label class="toggle"><input type="checkbox" id="tog-agency" onchange="calcState.agency=this.checked;updateAgencyHint()"><span class="toggle-slider"></span></label>
+      <label class="toggle"><input type="checkbox" id="tog-agency" onchange="calcState.agency=this.checked;updateAgencyHint();liveUpdate()"><span class="toggle-slider"></span></label>
+    </div>
+  </div>
+
+  <!-- LIVE PREVIEW CARD -->
+  <div id="live-preview-card" style="background:var(--accent-bg);border:1px solid var(--accent);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;">
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">💰 Предпросмотр сметы</div>
+    <div id="live-preview-lines" style="font-size:13px;color:var(--text2);line-height:1.8;"></div>
+    <div style="border-top:1px solid var(--accent);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;font-weight:700;color:var(--accent)">Итого к оплате</span>
+      <span id="live-preview-total" style="font-size:22px;font-weight:800;color:var(--accent)">0₽</span>
     </div>
   </div>
   <div class="gap"></div>
@@ -358,11 +374,6 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;b
     <div id="settings-crew-list"></div>
     <div style="padding:10px 16px"><button class="btn btn-secondary" onclick="openAddCrewModal()" style="font-size:13px;padding:10px">+ Добавить участника</button></div>
   </div>
-  <div class="form-section">
-    <div class="form-section-title">Pre-Production — цены (устарело)</div>
-    <div class="form-row"><div class="form-row-label">📝 Сценарий (₽/шт)</div><input type="number" id="inp-price-script" value="3500" min="0" step="100" onchange="DB.prices.script=+this.value;saveDB();buildPreRowsCalc()"></div>
-    <div class="form-row"><div class="form-row-label">🎭 Подбор актёров (₽/шт)</div><input type="number" id="inp-price-cast" value="2500" min="0" step="100" onchange="DB.prices.cast=+this.value;saveDB();buildPreRowsCalc()"></div>
-  </div>
   <div class="notice">Все изменения сохраняются в памяти браузера (localStorage). Работает без интернета.</div>
 </div>
 
@@ -469,9 +480,10 @@ const calcState={
   equipQty:{},equipToggle:{},crew:{},
   preQty:{},
   edits:[],comments:[],
-  deadline:10,revisions:3,logistics:0,adj_pct:0,ip:false,
+  deadline:10,revisions:3,logistics:0,adj_pct:0,ip:false,ipPct:7,
   reserve:false,reservePct:10,
   agency:false,agencyPct:15,
+  livePreview:true,
   pfSendSelected:new Set(),pfSendThanks:false,
 };
 function syncCalcStateEquip(){
@@ -501,7 +513,7 @@ function showPage(id){
   if(id==='settings')buildSettingsPage();
   if(id==='price')renderPricePage();
   if(id==='messages')buildMessagesPage();
-  if(id==='calc'){syncCalcStateEquip();buildTypeChips();buildExtraCrew();buildEquipRowsCalc();buildPreRowsCalc();buildCommentsList();buildEditsList();updateReserveHint();updateAgencyHint();}
+  if(id==='calc'){syncCalcStateEquip();buildTypeChips();buildExtraCrew();buildEquipRowsCalc();buildPreRowsCalc();buildCommentsList();buildEditsList();updateReserveHint();updateAgencyHint();toggleLivePreview();liveUpdate();}
 }
 function goHome(){showPage('home');}
 
@@ -579,6 +591,7 @@ function adjPreItem(label,d){
   calcState.preQty[label]=Math.max(0,(calcState.preQty[label]||0)+d);
   const el=document.getElementById('pre_'+label.replace(/[^a-zA-Zа-яА-Я0-9]/g,'_'));
   if(el)el.textContent=calcState.preQty[label];
+  liveUpdate();
 }
 // legacy stubs kept so old resets don't break
 function adjPre(k,d){}
@@ -607,8 +620,9 @@ function buildEquipRowsCalc(){
 }
 function adjEq(label,d){
   calcState.equipQty[label]=Math.max(0,(calcState.equipQty[label]||0)+d);
-  const safeKey=label.replace(/[^a-zA-Zа-яА-Я0-9]/g,'_');
-  const el=document.getElementById('eq_'+safeKey);if(el)el.textContent=calcState.equipQty[label];
+  const el=document.getElementById('eq_'+label.replace(/[^a-zA-Zа-яА-Я0-9]/g,'_'));
+  if(el)el.textContent=calcState.equipQty[label];
+  liveUpdate();
 }
 
 // ===== EXTRA CREW =====
@@ -629,8 +643,9 @@ function buildExtraCrew(){
 }
 function adjCrew(key,d){
   calcState.crew[key]=Math.max(0,Math.min(50,(calcState.crew[key]||0)+d));
-  const safeKey=key.replace(/[^a-zA-Zа-яА-Я0-9]/g,'_');
-  const el=document.getElementById('cr_'+safeKey);if(el)el.textContent=calcState.crew[key];
+  const el=document.getElementById('cr_'+key.replace(/[^a-zA-Zа-яА-Я0-9]/g,'_'));
+  if(el)el.textContent=calcState.crew[key];
+  liveUpdate();
 }
 
 // ===== COMMENTS =====
@@ -653,6 +668,7 @@ function adjCalc(key,d){
   if(key==='deadline')calcState.deadline=Math.max(1,Math.min(120,calcState.deadline+d));
   else if(key==='revisions')calcState.revisions=Math.max(0,Math.min(99,calcState.revisions+d));
   document.getElementById('val-'+key).textContent=calcState[key];
+  liveUpdate();
 }
 
 // ===== COMPUTE =====
@@ -676,7 +692,8 @@ function computeTotals(){
   const reserveAmt=calcState.reserve?Math.round(withAdj*calcState.reservePct/100):0;
   const agencyAmt=calcState.agency?Math.round((withAdj+reserveAmt)*calcState.agencyPct/100):0;
   const afterExtras=withAdj+reserveAmt+agencyAmt;
-  const final=calcState.ip?Math.ceil(afterExtras/0.93/2)*2:Math.round(afterExtras);
+  const ipMult=1+(calcState.ipPct||7)/100;
+  const final=calcState.ip?Math.ceil(afterExtras/((100-(calcState.ipPct||7))/100)/2)*2:Math.round(afterExtras);
   return{hrs,op,asst,crewSum,teamBase,eq,preSum,editsSum,logi,base,withAdj,reserveAmt,agencyAmt,afterExtras,final};
 }
 
@@ -736,38 +753,83 @@ function buildResult(){
 
 function genQuote(){
   const t=computeTotals();const s=calcState;
-  let txt=`Предварительный расчёт:\n\n🗓 Дата: ${s.dateStr}\n⏰ ${s.startMin!==null?mts(s.startMin):'—'}–${s.endMin!==null?mts(s.endMin):'—'} (${t.hrs} ч)\n📍 ${s.address||'—'}\n🎬 ${s.videoType||'—'}\n\n`;
+  let txt=`Предварительный расчёт на видео съёмку:\n`;
+  txt+=`\n🗓️Дата: ${s.dateStr}`;
+  txt+=`\n⏰Время: ${s.startMin!==null?mts(s.startMin):'—'}–${s.endMin!==null?mts(s.endMin):'—'}`;
+  txt+=`\n⏱️Длительность съёмки: ${t.hrs} ч`;
+  txt+=`\n📍Адрес: ${s.address||'—'}`;
+  txt+=`\n🎬 Тип ролика: ${s.videoType||'—'}`;
+
+  // Pre-Production
   if(t.preSum>0){
-    txt+=`📝 Pre-Production:\n`;
-    (DB.prices.preItems||[]).forEach(p=>{const q=s.preQty[p.label]||0;if(q>0)txt+=`• ${p.emoji} ${p.label} ×${q} = ${fm(p.price*q)}\n`;});
-    txt+=`Итого: ${fm(t.preSum)}\n\n`;
+    txt+=`\n\n📝 Pre-Production:`;
+    (DB.prices.preItems||[]).forEach(p=>{const q=s.preQty[p.label]||0;if(q>0)txt+=`\n• ${p.emoji} ${p.label} ${fm(p.price)}/${p.unit} × ${q} = ${fm(p.price*q)}`;});
+    txt+=`\nИтого за Pre-Production: ${fm(t.preSum)}`;
   }
-  txt+=`👥 Команда:\n• Оператор ${fm(s.op_rate)}/ч ×${t.hrs}ч = ${fm(t.op)}\n`;
-  if(s.asst)txt+=`• Ассистент ${fm(s.asst_rate)}/ч ×${t.hrs}ч = ${fm(t.asst)}\n`;
-  DB.prices.extraCrew.forEach(cr=>{const q=s.crew[cr.key]||0;if(q>0)txt+=`• ${cr.emoji} ${cr.key} ×${q} = ${fm(cr.rate*t.hrs*q)}\n`;});
-  txt+=`Итого команда: ${fm(t.teamBase)}\n\n`;
+
+  // Core team
+  txt+=`\n\n👥 Команда (Основа):`;
+  txt+=`\n•⁠ 🎬 Час видеосъёмки ${fm(s.op_rate)}/час × ${t.hrs}ч = ${fm(t.op)}`;
+  if(s.asst)txt+=`\n•⁠ 👨‍🔧 Ассистент ${fm(s.asst_rate)}/час × ${t.hrs}ч = ${fm(t.asst)}`;
+
+  // Extra crew
+  const crewLines=[];
+  DB.prices.extraCrew.forEach(cr=>{const q=s.crew[cr.key]||0;if(q>0)crewLines.push(`• ${cr.emoji} ${cr.key} ${fm(cr.rate)}/час × ${t.hrs}ч × ${q} = ${fm(cr.rate*t.hrs*q)}`);});
+  if(crewLines.length){txt+=`\n👥 Доп. команда:\n`+crewLines.join('\n');}
+  txt+=`\nИтого за команду: ${fm(t.teamBase)}`;
+
+  // Equipment
   if(t.eq>0){
-    txt+=`⚙️ Оборудование:\n`;
+    txt+=`\n\n⚙️ Доп оборудование:`;
     DB.equipment.forEach(e=>{
-      if(e.toggle&&calcState.equipToggle[e.label])txt+=`• ${e.emoji} ${e.label} = ${fm(e.price)}\n`;
-      else if(!e.toggle&&(calcState.equipQty[e.label]||0)>0)txt+=`• ${e.emoji} ${e.label} ×${calcState.equipQty[e.label]} = ${fm(e.price*calcState.equipQty[e.label])}\n`;
+      if(e.toggle&&s.equipToggle[e.label])txt+=`\n• ${e.emoji} ${e.label} ${fm(e.price)}/${e.unit} = ${fm(e.price)}`;
+      else if(!e.toggle&&(s.equipQty[e.label]||0)>0)txt+=`\n• ${e.emoji} ${e.label} ${fm(e.price)}/${e.unit} × ${s.equipQty[e.label]} = ${fm(e.price*s.equipQty[e.label])}`;
     });
-    txt+=`Итого оборудование: ${fm(t.eq)}\n\n`;
+    txt+=`\nИтого за оборудование: ${fm(t.eq)}`;
   }
+
+  // Edits
   if(s.edits.length>0){
-    txt+=`✂️ Монтаж:\n`;
-    s.edits.forEach(e=>txt+=`• ${e.name} ${e.unit==='мин'?e.qty+'мин':Math.round(e.qty)+'шт'} = ${fm(e.rate*e.qty)}\n`);
-    txt+=`Итого монтаж: ${fm(t.editsSum)}\n\n`;
+    txt+=`\n\n⏯️ Монтаж:`;
+    s.edits.forEach(e=>{
+      if(e.unit==='мин')txt+=`\n• ${e.name} — ${e.qty} мин × ${fm(e.rate)}/минута = ${fm(e.rate*e.qty)}`;
+      else txt+=`\n• ${e.name} — ${Math.round(e.qty)} шт × ${fm(e.rate)}/шт = ${fm(e.rate*e.qty)}`;
+    });
+    txt+=`\nИтого за монтаж: ${fm(t.editsSum)}`;
   }
-  if(t.logi>0)txt+=`🚕 Логистика: ${fm(t.logi)}\n\n`;
-  txt+=`💰 База: ${fm(t.base)}\n`;
-  if(s.adj_pct!==0)txt+=(s.adj_pct<0?`🏷 Скидка ${Math.abs(s.adj_pct)}%`:`📈 Наценка ${s.adj_pct}%`)+`: ${fm(t.withAdj)}\n`;
-  if(s.reserve)txt+=`🛡 Финансовый резерв ${s.reservePct}%: +${fm(t.reserveAmt)}\n`;
-  if(s.agency)txt+=`🏢 Агентская наценка ${s.agencyPct}%: +${fm(t.agencyAmt)}\n`;
-  if(s.ip)txt+=`💳 Оплата на ИП +7%: учтено\n`;
-  txt+=`\n💰 Итого: ${fm(t.final)}\n`;
-  txt+=`\n⏱ Дедлайн: ${s.deadline} дней\n🛠 Правок: ${s.revisions}\n🚖 Приезжаем за 30 мин\n🌠 Исходники за 1 день\n`;
-  if(s.comments.length>0)txt+=`\n✍️ Комментарии:\n${s.comments.map((c,i)=>`${i+1}. ${c}`).join('\n')}\n`;
+
+  // Logistics
+  if(t.logi>0)txt+=`\n\n🚕 Логистика: ${fm(t.logi)}`;
+
+  // Portfolio (selected items)
+  const pfLines=[];
+  s.pfSendSelected.forEach(i=>{if(DB.portfolio[i])pfLines.push(`• ${DB.portfolio[i].label} (${DB.portfolio[i].url})`);});
+  if(s.pfSendThanks)pfLines.push(`📨 Благодарственные письма (${DB.thanksUrl})`);
+  if(pfLines.length){txt+=`\n\n🗂 Кейсы:\n`+pfLines.join('\n');}
+
+  // Financial summary
+  txt+=`\n\n💰 Бюджет (базовый): ${fm(t.base)}`;
+  if(s.adj_pct<0)txt+=`\nСкидка: ${Math.abs(s.adj_pct)}%\nИтого после скидки: ${fm(t.withAdj)}`;
+  else if(s.adj_pct>0)txt+=`\nНаценка: ${s.adj_pct}%\nИтого после наценки: ${fm(t.withAdj)}`;
+  if(s.reserve)txt+=`\n🛡 Финансовый резерв ${s.reservePct}%: +${fm(t.reserveAmt)}`;
+  if(s.agency)txt+=`\n🏢 Агентская наценка ${s.agencyPct}%: +${fm(t.agencyAmt)}`;
+  if(s.ip)txt+=`\n💳 Оплата на ИП +${s.ipPct||7}%: ${fm(t.final)}`;
+
+  // Final total
+  txt+=`\n\n💰 Итого: ${fm(t.final)}`;
+
+  // Conditions
+  txt+=`\n\n⏱️ Дедлайн сдачи готового монтажа: В течение ${s.deadline} дней с момента окончания съёмочного дня`;
+  txt+=`\n🛠️ ${s.revisions} итерации(я) правок на монтаж`;
+
+  // Comments
+  if(s.comments.length>0){
+    txt+=`\n✍️ Комментарий:`;
+    s.comments.forEach((c,i)=>txt+=`\n${i+1}. ${c}`);
+  }
+
+  txt+=`\n🚖 Приезжаем на локацию за 30 минут до начала съёмок`;
+  txt+=`\n🌠🌉🌇 Исходники предоставляю в течение 1 дня с момента окончания съёмок`;
   return txt;
 }
 
@@ -781,6 +843,7 @@ function doReset(){
   calcState.edits=[];calcState.comments=[];
   calcState.deadline=10;calcState.revisions=3;calcState.logistics=0;calcState.adj_pct=0;calcState.ip=false;
   calcState.reserve=false;calcState.reservePct=10;calcState.agency=false;calcState.agencyPct=15;
+  calcState.ip=false;calcState.ipPct=7;calcState.livePreview=true;
   DB.equipment.forEach(e=>{if(e.toggle)calcState.equipToggle[e.label]=false;else calcState.equipQty[e.label]=0;});
   DB.prices.extraCrew.forEach(c=>calcState.crew[c.key]=0);
   ['inp-address','inp-logistics','inp-adj'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
@@ -788,7 +851,9 @@ function doReset(){
   document.getElementById('inp-asst-rate').value=2500;
   document.getElementById('inp-reserve-pct').value=10;
   document.getElementById('inp-agency-pct').value=15;
-  ['tog-asst','tog-ip','tog-reserve','tog-agency'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
+  document.getElementById('inp-ip-pct').value=7;
+  document.getElementById('ip-pct-label').textContent='+7%';
+  ['tog-asst','tog-ip','tog-reserve','tog-agency','tog-preview'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=id==='tog-preview';});
   document.getElementById('asst-rate-row').style.display='none';
   document.getElementById('display-date').textContent='—';
   document.getElementById('display-start').textContent='—';
@@ -797,6 +862,7 @@ function doReset(){
   document.getElementById('val-revisions').textContent=3;
   updateReserveHint();updateAgencyHint();
   buildTypeChips();buildExtraCrew();buildEquipRowsCalc();buildPreRowsCalc();buildEditsList();buildCommentsList();
+  toggleLivePreview();liveUpdate();
   toast('Смета очищена');
 }
 
@@ -818,8 +884,8 @@ function buildEditsList(){
     c.appendChild(row);
   });
 }
-function editAdj(i,d){const e=calcState.edits[i];const s=e.unit==='шт.'?1:0.5;e.qty=Math.max(0,e.qty+d*s);buildEditsList();}
-function removeEdit(i){calcState.edits.splice(i,1);buildEditsList();}
+function editAdj(i,d){const e=calcState.edits[i];const s=e.unit==='шт.'?1:0.5;e.qty=Math.max(0,e.qty+d*s);buildEditsList();liveUpdate();}
+function removeEdit(i){calcState.edits.splice(i,1);buildEditsList();liveUpdate();}
 let draftEdit=null;
 function openAddEditModal(){
   let rows='';
@@ -845,7 +911,7 @@ function openEditQtyModal(){
 }
 function adjDraft(d){const s=draftEdit.unit==='шт.'?1:0.5;draftEdit.qty=Math.max(0,draftEdit.qty+d*s);const el=document.getElementById('draft-qty');if(el)el.textContent=draftEdit.qty+' '+draftEdit.unit;}
 function setDraftQty(v){draftEdit.qty=v;openEditQtyModal();}
-function saveDraftEdit(){if(draftEdit&&draftEdit.qty>0){calcState.edits.push({...draftEdit});buildEditsList();}closeModal();}
+function saveDraftEdit(){if(draftEdit&&draftEdit.qty>0){calcState.edits.push({...draftEdit});buildEditsList();liveUpdate();}closeModal();}
 
 // ===== CALENDAR =====
 let calY,calM;
@@ -1006,6 +1072,36 @@ function updateAgencyHint(){
   else el.textContent='выкл';
 }
 
+// ===== LIVE PREVIEW =====
+function toggleLivePreview(){
+  const card=document.getElementById('live-preview-card');
+  if(!card)return;
+  card.style.display=calcState.livePreview?'block':'none';
+  if(calcState.livePreview)liveUpdate();
+}
+function liveUpdate(){
+  if(!calcState.livePreview)return;
+  const t=computeTotals();
+  const lines=[];
+  if(t.op>0)lines.push(`🎬 Оператор: ${fm(t.op)}`);
+  if(t.asst>0)lines.push(`👨‍🔧 Ассистент: ${fm(t.asst)}`);
+  if(t.crewSum>0)lines.push(`👥 Доп. команда: ${fm(t.crewSum)}`);
+  if(t.preSum>0)lines.push(`📝 Pre-Production: ${fm(t.preSum)}`);
+  if(t.eq>0)lines.push(`⚙️ Оборудование: ${fm(t.eq)}`);
+  if(t.editsSum>0)lines.push(`✂️ Монтаж: ${fm(t.editsSum)}`);
+  if(t.logi>0)lines.push(`🚕 Логистика: ${fm(t.logi)}`);
+  lines.push(`─────────────`);
+  lines.push(`База: ${fm(t.base)}`);
+  if(calcState.adj_pct!==0)lines.push(`${calcState.adj_pct<0?'🏷 Скидка':'📈 Наценка'} ${Math.abs(calcState.adj_pct)}%: ${fm(t.withAdj)}`);
+  if(calcState.reserve)lines.push(`🛡 Резерв ${calcState.reservePct}%: +${fm(t.reserveAmt)}`);
+  if(calcState.agency)lines.push(`🏢 Агентская ${calcState.agencyPct}%: +${fm(t.agencyAmt)}`);
+  if(calcState.ip)lines.push(`💳 ИП +${calcState.ipPct||7}%: учтено`);
+  const linesEl=document.getElementById('live-preview-lines');
+  const totalEl=document.getElementById('live-preview-total');
+  if(linesEl)linesEl.innerHTML=lines.map(l=>l==='─────────────'?`<div style="border-top:1px solid var(--border);margin:4px 0"></div>`:`<div>${l}</div>`).join('');
+  if(totalEl)totalEl.textContent=fm(t.final);
+}
+
 // ===== MESSAGES PAGE =====
 let _currentCustomMsgIdx=-1;
 function buildMessagesPage(){
@@ -1073,8 +1169,6 @@ function removeCustomMsg(i){
 function buildSettingsPage(){
   document.getElementById('inp-link-kp').value=DB.links.kp;
   document.getElementById('inp-link-contracts').value=DB.links.contracts;
-  document.getElementById('inp-price-script').value=DB.prices.script;
-  document.getElementById('inp-price-cast').value=DB.prices.cast;
   buildSettingsPf();buildSettingsVTypes();buildSettingsEquip();buildSettingsPre();buildSettingsCrew();
 }
 function saveLinks(){
@@ -1277,7 +1371,7 @@ function addCrewItem(){
 function init(){
   buildTypeChips();buildExtraCrew();buildEquipRowsCalc();buildPreRowsCalc();
   updatePreHints();buildCommentsList();buildEditsList();buildMessagesPage();
-  updateReserveHint();updateAgencyHint();
+  updateReserveHint();updateAgencyHint();toggleLivePreview();liveUpdate();
 }
 init();
 
